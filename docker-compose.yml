@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  auth_service:
+    container_name: auth_service
+    restart: always
+    build:
+      context: ./auth/
+      dockerfile: ./docker/app/Dockerfile
+    env_file:
+      - ./auth/.env
+    volumes:
+      - ./auth/:/auth
+    command: bash -c "alembic upgrade head && uvicorn main:app --reload --host 0.0.0.0 --port 8000"
+    ports:
+      - '8000:8000'
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  notification_service:
+    container_name: notification_service
+    restart: always
+    build:
+      context: notification/
+      dockerfile: ./docker/app/Dockerfile
+    env_file:
+      - notification/.env
+    volumes:
+      - ./notification/:/notification
+    command: bash -c "uvicorn main:app --reload --host 0.0.0.0 --port 8001"
+    ports:
+      - '8001:8001'
+    depends_on:
+#      - postgres
+      - rabbitmq
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    volumes:
+      - ./rabbitmq_data:/var/lib/rabbitmq
