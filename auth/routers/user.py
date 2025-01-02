@@ -1,15 +1,19 @@
+from tkinter.tix import Form
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from db.conf.session import get_session
 from schemas.user import ResponseUserForm, LoginForm, UserCreate, ResetPasswordForm, ResetPasswordPasswordForm, \
-    SetPassword
+    SetPassword, GoogleAuthData
 from schemas.token import Token
 from fastapi.security import OAuth2PasswordRequestForm
 from services.user_service import UserService, get_authenticated_user
 from services.auth_service import AuthService
 from services.email_service import EmailService
 from services.reset_password import ResetPasswordService
+from services.google_auth_service import GoogleAuthService
+import logging
 
 user_router = APIRouter(prefix="/user", tags=["user"])
 
@@ -61,6 +65,27 @@ async def set_new_password(password_form: SetPassword, db: AsyncSession = Depend
                            user: ResponseUserForm = Depends(get_authenticated_user)):
     user_service = ResetPasswordService(db)
     result = await user_service.set_password(password_form, user)
+    return result
+
+
+@user_router.post('/google/redirect-url', status_code=status.HTTP_200_OK)
+async def login():
+    user_service = GoogleAuthService()
+    result = await user_service.get_google_url()
+    return result
+
+
+@user_router.get('/google/callback', status_code=status.HTTP_200_OK)
+async def login_callback(code: str):
+    google_auth = GoogleAuthService()
+    result = await google_auth.get_google_token(code)
+    return result
+
+
+@user_router.post('/google/auth', status_code=status.HTTP_200_OK)
+async def login_callback(data: GoogleAuthData,db: AsyncSession = Depends(get_session)):
+    google_auth = GoogleAuthService(db)
+    result = await google_auth.google_auth(data)
     return result
 
 

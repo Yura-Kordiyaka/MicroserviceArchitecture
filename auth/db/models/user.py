@@ -11,7 +11,7 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     first_name = Column(String)
     last_name = Column(String)
-    password = Column(String)
+    password = Column(String, nullable=True)
     confirm_email = Column(Boolean, default=False)
     created_at = mapped_column(DateTime, default=func.now())
     updated_at = mapped_column(DateTime, default=func.now(), onupdate=func.now())

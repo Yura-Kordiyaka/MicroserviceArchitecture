@@ -30,10 +30,17 @@ class QueueSettings(BaseSettings):
     user_creation_queue: str = os.environ.get('USER_CREATION_QUEUE')
     reset_password_queue: str = os.environ.get('USER_RESET_PASSWORD')
 
+
 class RedisSettings(BaseSettings):
     REDIS_PASSWORD: str = os.environ.get('REDIS_PASSWORD')
     REDIS_USER: str = os.environ.get('REDIS_USER')
     REDIS_USER_PASSWORD: str = os.environ.get('REDIS_USER_PASSWORD')
+
+
+class GoogleSettings(BaseSettings):
+    GOOGLE_CLIENT_ID: str = os.environ.get('GOOGLE_CLIENT_ID')
+    GOOGLE_SECRET_ID: str = os.environ.get('GOOGLE_SECRET_ID')
+    GOOGLE_REDIRECT_URL: str = os.environ.get('GOOGLE_REDIRECT_URL')
 
 
 class Settings(BaseSettings):
@@ -41,6 +48,8 @@ class Settings(BaseSettings):
     token: TokenSettings = TokenSettings()
     rabbitmq: RabbitMQSettings = RabbitMQSettings()
     queue_settings: QueueSettings = QueueSettings()
-    redis_settings:RedisSettings=RedisSettings()
+    redis_settings: RedisSettings = RedisSettings()
+    google_settings: GoogleSettings = GoogleSettings()
+
 
 settings = Settings()

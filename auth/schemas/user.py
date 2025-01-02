@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from typing import Optional
 from .token import Token
 
 
@@ -40,3 +41,16 @@ class ResetPasswordPasswordForm(BaseModel):
 
 class SetPassword(BaseModel):
     password: str
+
+
+class GoogleAuthData(BaseModel):
+    id: str
+    email: str
+    verified_email: bool
+    name: str
+    given_name: str
+    family_name: str
+    picture: Optional[str] = None
+
+    class Config:
+        orm_mode = True

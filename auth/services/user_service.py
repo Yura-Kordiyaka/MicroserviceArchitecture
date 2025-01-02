@@ -11,7 +11,7 @@ from fastapi.security import OAuth2PasswordBearer
 import logging
 
 oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="api/v1/user/login",
+    tokenUrl="auth/api/v1/user/login",
     scheme_name="Bearer"
 )
 class UserService:
@@ -32,7 +32,6 @@ class UserService:
 
     async def get_current_user_service(self, token: str = Depends(oauth2_scheme)) -> User:
         return await self.get_current_user(token)
-    # async def reset_token(self, token: str) -> int:
 
 
 async def get_authenticated_user(

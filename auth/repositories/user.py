@@ -7,6 +7,8 @@ from sqlalchemy import select
 from fastapi import Depends, HTTPException
 from utils.password import get_hashed_password, verify_password
 from fastapi.security import OAuth2PasswordRequestForm
+
+
 class UserBaseRepository(ABC):
     @abstractmethod
     async def get_user_by_id(self, user_id):
@@ -23,6 +25,7 @@ class UserBaseRepository(ABC):
     @abstractmethod
     async def update_user(self, user):
         pass
+
     #
     # @abstractmethod
     # async def delete_user(self, user_id):
@@ -40,7 +43,7 @@ class UserRepository(UserBaseRepository):
     async def get_user_by_id(self, user_id):
         existing_user = (await self.db.execute(select(User).filter(User.id == user_id))).scalars().first()
         if existing_user is None:
-            raise HTTPException(status_code=404,detail='User not found')
+            raise HTTPException(status_code=404, detail='User not found')
         return existing_user
 
     async def get_user_by_email(self, email):
@@ -48,13 +51,16 @@ class UserRepository(UserBaseRepository):
         return existing_user
 
     async def create_user(self, user_data):
-        new_user = User(**user_data.dict())
+        if isinstance(user_data, dict):
+            new_user = User(**user_data)
+        else:
+            new_user = User(**user_data.dict())
         self.db.add(new_user)
         await self.db.commit()
         await self.db.refresh(new_user)
         return new_user
 
-    async def verify_credentials(self, user_data:OAuth2PasswordRequestForm):
+    async def verify_credentials(self, user_data: OAuth2PasswordRequestForm):
         existing_user = await self.get_user_by_email(user_data.username)
         if existing_user:
             if verify_password(user_data.password, existing_user.password):
