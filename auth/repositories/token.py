@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from http.client import HTTPException
+from fastapi import HTTPException
 
 from config import settings
 from datetime import timedelta, datetime
@@ -46,11 +46,10 @@ class JWTTokenRepository(TokenBaseRepository):
                 payload = jwt.decode(access_token, self.JWT_SECRET_KEY, algorithms=self.ALGORITHM)
                 id: str = payload.get("sub")
                 if id is None:
-                    raise HTTPException("user is not anothorize")
+                    raise HTTPException(status_code=404, detail="token is not valid")
                 token_data = id
             except JWTError as e:
-                print(e)
-                raise HTTPException("user is not anothorize")
+                raise HTTPException(status_code=404, detail="token is not valid")
             return token_data
 
 
@@ -59,8 +58,9 @@ class JWTTokenRepository(TokenBaseRepository):
             payload = jwt.decode(refresh_token, self.JWT_REFRESH_SECRET_KEY, algorithms=[self.ALGORITHM])
             id: str = payload.get("sub")
             if id is None:
-                raise HTTPException("token is invalid")
+                raise HTTPException(status_code=404, detail="token is invalid")
             token_data = id
         except JWTError as e:
-            raise HTTPException("token is invalid")
+            raise HTTPException(status_code=404, detail="token is invalid")
         return token_data
+

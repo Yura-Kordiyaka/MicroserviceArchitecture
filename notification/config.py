@@ -13,18 +13,23 @@ class RabbitMQSettings(BaseSettings):
 
 
 class EmailSettings(BaseSettings):
-    MAIL_PASSWORD: str = "your_email_password"
+    MAIL_PASSWORD: str = os.environ.get('MAIL_PASSWORD')
     MAIL_FROM: str = os.environ.get('MAIL_FROM')
     MAIL_SERVER: str = "smtp.gmail.com"
-    MAIL_PORT = 587
-    MAIL_USE_TLS = True
-    MAIL_USE_SSL = False
-    MAIL_DEBUG = True
+    MAIL_PORT: int = 587
+    MAIL_STARTTLS: bool = True
+    MAIL_SSL_TLS: bool = False
+    MAIL_DEBUG: bool = True
 
+
+class QueueSettings(BaseSettings):
+    user_creation_queue: str = os.environ.get('USER_CREATION_QUEUE')
+    reset_password_queue: str = os.environ.get('USER_RESET_PASSWORD')
 
 class Settings(BaseSettings):
     email_settings: EmailSettings = EmailSettings()
     rabbitmq: RabbitMQSettings = RabbitMQSettings()
+    queue_settings: QueueSettings = QueueSettings()
 
 
 settings = Settings()

@@ -1,18 +1,15 @@
 import logging
+from handle_queues.base import BaseQueueHandle
 class MessageProcessor:
+    def __init__(self):
+        self.handlers = {}
+
+    def register_handler(self, queue_name: str, handler: BaseQueueHandle):
+        self.handlers[queue_name] = handler
+
     async def process_message(self, queue_name: str, data: dict):
-        if queue_name == "notification_create_user":
-            await self.handle_queue_1(data)
-        elif queue_name == "queue_2":
-            await self.handle_queue_2(data)
+        handler = self.handlers.get(queue_name)
+        if handler:
+            await handler.handle(data)
         else:
-            print(f"Unhandled queue: {queue_name}")
-
-    async def handle_queue_1(self, data):
-        print(f"Processing queue_1 message: {data}")
-        logging.info('hello handle_queue_1')
-        # Логіка для queue_1
-
-    async def handle_queue_2(self, data):
-        print(f"Processing queue_2 message: {data}")
-        # Логіка для queue_2
+            logging.warning(f"No handler registered for queue: {queue_name}")

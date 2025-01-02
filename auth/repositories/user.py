@@ -20,9 +20,9 @@ class UserBaseRepository(ABC):
     async def create_user(self, user_data):
         pass
 
-    # @abstractmethod
-    # async def update_user(self, user_id, user_data):
-    #     pass
+    @abstractmethod
+    async def update_user(self, user):
+        pass
     #
     # @abstractmethod
     # async def delete_user(self, user_id):
@@ -40,7 +40,7 @@ class UserRepository(UserBaseRepository):
     async def get_user_by_id(self, user_id):
         existing_user = (await self.db.execute(select(User).filter(User.id == user_id))).scalars().first()
         if existing_user is None:
-            raise HTTPException('User not found')
+            raise HTTPException(status_code=404,detail='User not found')
         return existing_user
 
     async def get_user_by_email(self, email):
@@ -62,3 +62,7 @@ class UserRepository(UserBaseRepository):
             else:
                 raise HTTPException(status_code=400, detail="Invalid password")
         raise HTTPException(status_code=404, detail="User not found")
+
+    async def update_user(self, user):
+        await self.db.commit()
+        await self.db.refresh(user)
